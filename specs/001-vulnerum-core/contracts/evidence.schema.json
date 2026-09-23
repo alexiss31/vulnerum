@@ -1,0 +1,116 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "$id": "https://github.com/alexiss31/custos-vulnerum/specs/001-vulnerum-core/contracts/evidence.schema.json",
+    "title": "Custos Vulnerum evidence run",
+    "type": "object",
+    "required": [
+        "schema_version",
+        "run_id",
+        "lab_id",
+        "cve",
+        "phase",
+        "started_at",
+        "finished_at",
+        "token",
+        "steps",
+        "result"
+    ],
+    "properties": {
+        "schema_version": { "type": "string", "const": "1.0" },
+        "run_id": { "type": "string", "pattern": "^[0-9]{8}T[0-9]{6}Z$" },
+        "lab_id": { "type": "string" },
+        "cve": { "type": "string", "pattern": "^CVE-[0-9]{4}-[0-9]{4,}$" },
+        "phase": { "type": "string", "enum": ["poc", "retest"] },
+        "started_at": { "type": "string", "format": "date-time" },
+        "finished_at": { "type": "string", "format": "date-time" },
+        "token": { "type": "string", "minLength": 8 },
+        "result": { "type": "string", "enum": ["vulnerable", "not_vulnerable", "error"] },
+        "steps": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["name", "type", "role", "expected", "indicators_met"],
+                "properties": {
+                    "name": { "type": "string" },
+                    "type": { "type": "string", "enum": ["http", "canary_ldap"] },
+                    "role": { "type": "string", "enum": ["act", "proof"] },
+                    "description": { "type": "string" },
+                    "expected": { "type": "string" },
+                    "indicators_met": { "type": "boolean" },
+                    "request": {
+                        "type": "object",
+                        "required": ["method", "url", "sent_at"],
+                        "properties": {
+                            "method": { "type": "string" },
+                            "url": { "type": "string" },
+                            "headers": { "type": "object" },
+                            "body_excerpt": { "type": "string" },
+                            "sent_at": { "type": "string", "format": "date-time" }
+                        }
+                    },
+                    "response": {
+                        "type": "object",
+                        "required": ["status", "received_at"],
+                        "properties": {
+                            "status": { "type": "integer" },
+                            "body_excerpt": { "type": "string" },
+                            "received_at": { "type": "string", "format": "date-time" }
+                        }
+                    },
+                    "logs": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["service", "lines"],
+                            "properties": {
+                                "service": { "type": "string" },
+                                "lines": { "type": "array", "items": { "type": "string" } }
+                            }
+                        }
+                    },
+                    "canary": {
+                        "type": ["object", "null"],
+                        "required": ["checked", "matched"],
+                        "properties": {
+                            "checked": { "type": "boolean" },
+                            "matched": { "type": "boolean" },
+                            "matched_lines": { "type": "array", "items": { "type": "string" } },
+                            "observed_at": { "type": ["string", "null"], "format": "date-time" }
+                        }
+                    }
+                }
+            }
+        },
+        "detections": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["rule_id", "rule_title", "rule_level", "technique_ids", "matched_identifiers"],
+                "properties": {
+                    "rule_id": { "type": "string" },
+                    "rule_title": { "type": "string" },
+                    "rule_level": { "type": "string" },
+                    "attack_tags": { "type": "array", "items": { "type": "string" } },
+                    "technique_ids": { "type": "array", "items": { "type": "string" } },
+                    "matched_event": { "type": "object" },
+                    "matched_identifiers": { "type": "array", "items": { "type": "string" } }
+                }
+            }
+        },
+        "attack": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["technique_id", "name", "tactic_name", "url"],
+                "properties": {
+                    "technique_id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "tactic_id": { "type": "string" },
+                    "tactic_name": { "type": "string" },
+                    "url": { "type": "string" },
+                    "source": { "type": "string" }
+                }
+            }
+        }
+    }
+}
