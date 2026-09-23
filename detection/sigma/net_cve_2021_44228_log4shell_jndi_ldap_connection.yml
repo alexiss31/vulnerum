@@ -1,0 +1,32 @@
+title: 'Log4Shell JNDI Lookup Captured by LDAP Canary (CVE-2021-44228)'
+id: 8bd364eb-de3d-4b11-b8c7-8567f926240d
+status: 'experimental'
+description: >
+    Detects a completed Log4Shell exploitation primitive: a logged application resolved
+    a ${jndi:...} lookup and opened an outbound LDAP connection, captured here by the
+    Custos Vulnerum in-network canary. This is the strongest signal that the vulnerable
+    code path executed, independent of the HTTP request shape.
+references:
+    - 'https://nvd.nist.gov/vuln/detail/CVE-2021-44228'
+    - 'https://logging.apache.org/log4j/2.x/security.html'
+author: 'Alexis Heugas (Custos Vulnerum)'
+date: '2026-09-23'
+logsource:
+    category: 'network'
+    product: 'custos'
+    service: 'ldap_canary'
+    definition: >
+        Custos Vulnerum in-network LDAP canary output: one line per captured connection
+        with the raw LDAP bytes rendered as ASCII (run tokens appear in the search base).
+detection:
+    canary_hit:
+        - 'CANARY connection'
+    condition: 'canary_hit'
+falsepositives:
+    - 'None expected: the canary port is referenced only by fixed lab payloads'
+level: 'critical'
+tags:
+    - 'attack.initial_access'
+    - 'attack.t1190'
+    - 'cve.2021'
+    - 'cve.2021.44228'

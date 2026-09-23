@@ -1,0 +1,50 @@
+title: 'Log4Shell JNDI Lookup Payload in HTTP Request (CVE-2021-44228)'
+id: 28519b8c-248c-4905-a84a-543141fdda8f
+status: 'test'
+description: >
+    Detects Log4Shell exploitation attempts: ${jndi:...} message lookup payloads in the
+    HTTP request path, user-agent or body, in raw and URL-encoded form. A hit means an
+    attempt; confirm exploitation with the outbound JNDI connection signal
+    (net_cve_2021_44228_log4shell_jndi_ldap_connection).
+references:
+    - 'https://nvd.nist.gov/vuln/detail/CVE-2021-44228'
+    - 'https://logging.apache.org/log4j/2.x/security.html'
+    - 'https://github.com/vulhub/vulhub/tree/master/log4j/CVE-2021-44228'
+author: 'Alexis Heugas (Custos Vulnerum)'
+date: '2026-09-23'
+logsource:
+    category: 'webserver'
+    product: 'solr'
+    service: 'solr'
+    definition: >
+        Solr HTTP request logs. In Custos evidence this matches the normalized
+        http_path/http_user_agent/http_body fields of recorded PoC requests.
+detection:
+    selection_path_raw:
+        http_path|contains: '${jndi'
+    selection_path_encoded:
+        http_path|contains:
+            - '$%7Bjndi'
+            - '%24%7Bjndi'
+            - '%24{jndi'
+    selection_useragent_raw:
+        http_user_agent|contains: '${jndi'
+    selection_body_raw:
+        http_body|contains: '${jndi'
+    selection_log_raw:
+        message|contains: '${jndi'
+    selection_log_encoded:
+        message|contains:
+            - '$%7Bjndi'
+            - '%24%7Bjndi'
+            - '%24{jndi'
+    condition: '1 of selection_*'
+falsepositives:
+    - 'Vulnerability scanners probing for Log4Shell'
+    - 'Documentation sites echoing the literal marker in content'
+level: 'critical'
+tags:
+    - 'attack.initial_access'
+    - 'attack.t1190'
+    - 'cve.2021'
+    - 'cve.2021.44228'

@@ -1,0 +1,32 @@
+<!--
+  Optional Wazuh adapter for Custos Vulnerum (the default demo does NOT need Wazuh).
+
+  These rules mirror the Sigma rules in ../sigma/ using Wazuh's ruleset XML syntax and
+  match on the raw log line, so they work without a custom decoder. Author: Alexis
+  Heugas (Custos Vulnerum), MIT like the rest of the original code.
+
+  Install (bare manager):
+    1. Merge into /var/ossec/etc/rules/local_rules.xml on the Wazuh manager.
+    2. Restart the manager, then test lines with /var/ossec/bin/wazuh-logtest.
+  Install (wazuh/wazuh-docker):
+    - Mount this file under the manager's /var/ossec/etc/rules/ in your compose file.
+  See README.md in this directory for details.
+-->
+<group name="custos_vulnerum,exploit_attempt,">
+  <rule id="100100" level="12">
+    <pcre2>(\.%2e|%2e%2e|\.\.%2f|%2f\.\.)</pcre2>
+    <description>CVE-2021-41773: Apache HTTP Server path traversal attempt (encoded dot segments).</description>
+    <mitre>
+      <id>T1190</id>
+      <id>T1059.004</id>
+    </mitre>
+  </rule>
+
+  <rule id="100101" level="15">
+    <pcre2>(\$\{jndi|\$%7Bjndi|%24%7Bjndi)</pcre2>
+    <description>CVE-2021-44228 (Log4Shell): JNDI lookup payload in HTTP request.</description>
+    <mitre>
+      <id>T1190</id>
+    </mitre>
+  </rule>
+</group>

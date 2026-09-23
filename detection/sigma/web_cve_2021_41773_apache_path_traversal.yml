@@ -1,0 +1,46 @@
+title: 'Apache HTTP Server Path Traversal Attempt (CVE-2021-41773)'
+id: 5e214d66-3c4b-45e8-b614-891db196599f
+status: 'test'
+description: >
+    Detects exploitation attempts of the Apache HTTP Server 2.4.49 path traversal
+    (CVE-2021-41773; incomplete fix CVE-2021-42013) through encoded dot segments in the
+    request path. The Custos Vulnerum lab demonstrates arbitrary file disclosure
+    (/etc/passwd) and CGI-based code execution with this primitive.
+references:
+    - 'https://nvd.nist.gov/vuln/detail/CVE-2021-41773'
+    - 'https://httpd.apache.org/security/vulnerabilities_24.html'
+    - 'https://github.com/vulhub/vulhub/tree/master/httpd/CVE-2021-41773'
+author: 'Alexis Heugas (Custos Vulnerum)'
+date: '2026-09-23'
+logsource:
+    category: 'webserver'
+    product: 'apache'
+    service: 'httpd'
+    definition: >
+        Apache httpd access logs (common log format). In Custos evidence this matches the
+        normalized http_path field (raw request path including query string).
+detection:
+    selection_traversal:
+        http_path|contains:
+            - '.%2e'
+            - '%2e%2e'
+            - '..%2f'
+            - '%2f..%2f'
+    selection_log_traversal:
+        message|contains:
+            - '.%2e'
+            - '%2e%2e'
+            - '..%2f'
+            - '%2f..%2f'
+    condition: '1 of selection_*'
+falsepositives:
+    - 'Vulnerability scanners probing for CVE-2021-41773'
+    - 'URL normalisation edge cases in upstream proxies'
+level: 'high'
+tags:
+    - 'attack.initial_access'
+    - 'attack.t1190'
+    - 'attack.execution'
+    - 'attack.t1059.004'
+    - 'cve.2021'
+    - 'cve.2021.41773'
