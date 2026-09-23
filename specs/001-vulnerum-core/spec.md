@@ -57,12 +57,13 @@ rules plus ATT&CK technique IDs attached to the evidence.
 evidence produced in US2.
 
 **Independent Test**: `custos detect <id>` after a successful run reports ≥1 matched rule
-with ATT&CK IDs; after a retest run it reports 0 matches.
+with ATT&CK IDs; after a retest run the exploitation-signal rule reports no match.
 
 **Acceptance Scenarios**:
 
 1. **Given** a `vulnerable` evidence run, **When** the operator runs `custos detect <id>`, **Then** the matching Sigma rule and its ATT&CK IDs are stored in `detections.json` and merged into the evidence record.
-2. **Given** rules in `detection/sigma/`, **When** CI validates them, **Then** current SigmaHQ tooling accepts them and they parse under the Sigma v2 specification.
+2. **Given** a retest evidence run, **When** the operator runs `custos detect <id> --retest`, **Then** the exploitation-signal rule (canary/lookup) reports zero matches — attempt indicators may still match, because the attempt itself stays visible in logs.
+3. **Given** rules in `detection/sigma/`, **When** CI validates them, **Then** current SigmaHQ tooling accepts them and they parse under the Sigma v2 specification.
 
 ### User Story 4 - Mitigate, retest, and export the lifecycle report (Priority: P4)
 

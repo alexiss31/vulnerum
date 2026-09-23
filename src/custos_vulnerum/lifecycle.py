@@ -15,8 +15,8 @@ from .errors import LifecycleError
 
 Variant = Literal["vulnerable", "mitigated"]
 
-_COMPOSE_TIMEOUT = 300.0
-_READY_TIMEOUT = 120.0
+_COMPOSE_TIMEOUT = 900.0  # cold image pulls/builds happen inside `compose up`
+_READY_TIMEOUT = 180.0
 
 
 def _as_dict(value: object) -> dict[str, object]:

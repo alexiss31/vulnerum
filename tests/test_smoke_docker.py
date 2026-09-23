@@ -89,10 +89,7 @@ def test_full_lifecycle(lab_id: str, tmp_path: Path, monkeypatch: pytest.MonkeyP
     assert reports, "report.md must be written"
     report_text = reports[-1].read_text(encoding="utf-8")
     assert "Mitigation effective: verified" in report_text
-    assert (
-        lab_id.replace("cve-", "CVE-").upper().replace("CVE-2021-", "CVE-2021-")
-        in report_text.upper()
-    )
+    assert lab_id.replace("cve-", "CVE-") in report_text
 
     _invoke("lab", "down", lab_id)
 
