@@ -113,6 +113,8 @@ def test_run_plan_act_failure_is_error(apache_lab: Any, monkeypatch: Any) -> Non
 
 def test_run_plan_canary_proof(log4j_lab: Any, monkeypatch: Any) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/log":
+            return httpx.Response(200, text="logged")
         return httpx.Response(200, text="log4j-2.14.1 ok")
 
     def fake_logs(self: LabEnvironment, service: str, since: Any = None) -> str:
@@ -139,6 +141,8 @@ def test_run_plan_canary_proof(log4j_lab: Any, monkeypatch: Any) -> None:
 
 def test_run_plan_canary_silent_means_not_vulnerable(log4j_lab: Any, monkeypatch: Any) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/log":
+            return httpx.Response(200, text="logged")
         return httpx.Response(200, text="log4j-2.14.1 ok")
 
     monkeypatch.setattr(LabEnvironment, "logs", lambda self, service, since=None: "")

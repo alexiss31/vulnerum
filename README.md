@@ -64,14 +64,41 @@ Add your own CVE without touching orchestration: copy `labs/_template/` and foll
 `custos run` writes normalized evidence (timestamp, request, selected logs, result) to
 `artifacts/<lab>/<run>/evidence.json`; `custos detect` matches the Sigma v2 rules in
 [`detection/sigma/`](detection/sigma/) and attaches MITRE ATT&CK technique IDs;
-`custos report` renders the full lifecycle into `report.md` + `report.html`:
+`custos report` renders the full lifecycle into `report.md` + `report.html`.
+
+Captured from the real end-to-end run (CVE-2021-41773):
 
 ```text
 $ uv run custos run cve-2021-41773
+                     poc cve-2021-41773 (vulnerable) → vulnerable
+┌───────────────────────────┬───────┬──────────────────────────────┬──────────┬────────────┐
+│ Step                      │ Role  │ Expected                     │ Result   │ Indicators │
+├───────────────────────────┼───────┼──────────────────────────────┼──────────┼────────────┤
+│ baseline                  │ act   │ status in [200] and body     │ HTTP 200 │ MET        │
+│                           │       │ contains ['It works!']       │          │            │
+│ traversal-file-disclosure │ proof │ status in [200] and body     │ HTTP 200 │ MET        │
+│                           │       │ contains ['root:x:0:0']      │          │            │
+│ traversal-cgi-rce         │ proof │ status in [200] and body     │ HTTP 200 │ MET        │
+│                           │       │ matches ['uid=[0-9]+...']    │          │            │
+└───────────────────────────┴───────┴──────────────────────────────┴──────────┴────────────┘
+
+$ uv run custos detect cve-2021-41773
+ATT&CK: T1059.004 (Execution), T1190 (Initial Access)
 ```
 
-*(Real captured output from the end-to-end run is embedded here — see "Testing & CI"
-to reproduce locally in minutes.)*
+And the report verdict (`artifacts/<lab>/<run>/report.md`):
+
+```markdown
+| Stage                  | Environment | Result          | Evidence         |
+|------------------------|-------------|-----------------|------------------|
+| Verify (vulnerable)    | vulnerable  | True            | 3 checks         |
+| PoC                    | vulnerable  | **vulnerable**  | `20260923T055500Z` |
+| Detect                 | vulnerable  | 5 rule(s) matched | `20260923T055500Z` |
+| Verify (mitigated)     | mitigated   | not run         | —                |
+| Retest                 | mitigated   | **not_vulnerable** | `20260923T050842Z` |
+
+**Mitigation effective: verified** (PoC vulnerable → retest not_vulnerable).
+```
 
 The Wazuh adapter in [`detection/wazuh/`](detection/wazuh/) is optional — the demo
 never requires Wazuh.

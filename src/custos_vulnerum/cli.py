@@ -12,6 +12,7 @@ from typing import Any
 import typer
 from rich.console import Console
 from rich.table import Table
+from rich.text import Text
 
 from . import (
     attack as attack_mod,
@@ -53,8 +54,13 @@ app = typer.Typer(
 lab_app = typer.Typer(help="Launch and tear down lab environments.", no_args_is_help=True)
 app.add_typer(lab_app, name="lab")
 
-console = Console()
-err_console = Console(stderr=True)
+console = Console(emoji=False)
+err_console = Console(stderr=True, emoji=False)
+
+
+def _cell(value: object) -> Text:
+    """Render data verbatim (no Rich markup/emoji reinterpretation of user data)."""
+    return Text(str(value))
 
 
 def _paths() -> Paths:
@@ -89,12 +95,12 @@ def list_labs() -> None:
         table.add_column(column)
     for lab in labs:
         table.add_row(
-            lab.id,
-            lab.meta.cve,
-            lab.meta.severity,
-            f"{lab.meta.component} ({lab.meta.affected_versions})",
-            f"127.0.0.1:{lab.meta.compose.port}",
-            _status(lab),
+            _cell(lab.id),
+            _cell(lab.meta.cve),
+            _cell(lab.meta.severity),
+            _cell(f"{lab.meta.component} ({lab.meta.affected_versions})"),
+            _cell(f"127.0.0.1:{lab.meta.compose.port}"),
+            _cell(_status(lab)),
         )
     console.print(table)
 
@@ -169,10 +175,10 @@ def verify(
     for check in record.checks:
         style = "green" if check.passed else "red"
         table.add_row(
-            check.description,
-            check.expected,
-            check.observed,
-            f"[{style}]{'yes' if check.passed else 'NO'}[/{style}]",
+            _cell(check.description),
+            _cell(check.expected),
+            _cell(check.observed),
+            Text("yes" if check.passed else "NO", style=style),
         )
     console.print(table)
     if not record.passed:
@@ -224,11 +230,11 @@ def run_poc(
         )
         style = "green" if step.indicators_met else "white"
         table.add_row(
-            step.name,
-            step.role,
-            step.expected,
-            observed,
-            f"[{style}]{'MET' if step.indicators_met else 'not met'}[/{style}]",
+            _cell(step.name),
+            _cell(step.role),
+            _cell(step.expected),
+            _cell(observed),
+            Text("MET" if step.indicators_met else "not met", style=style),
         )
     console.print(table)
     console.print(f"evidence: {run_dir / evidence_mod.EVIDENCE_FILE}")
