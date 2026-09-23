@@ -1,0 +1,141 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema#",
+    "title": "Sigma rule specification V2.0.0 (2024-08-08)",
+    "type": "object",
+    "required": ["title", "logsource", "detection"],
+    "properties": {
+        "title": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "A brief title for the rule that should contain what the rules is supposed to detect"
+        },
+        "id": {
+            "type": "string",
+            "description": "A globally unique identifier for the Sigma rule. This is recommended to be a UUID v4, but not mandatory.",
+            "format": "uuid"
+        },
+        "related": {
+            "type": "array",
+            "description": "A list of related Sigma rules to keep track of the relationships between detections. This can be used to indicate that a rule is derived from another rule, or that a rule has been obsoleted by another rule.",
+            "items": {
+                "type": "object",
+                "required": ["id", "type"],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "A globally unique identifier for the Sigma rule. This is recommended to be a UUID v4, but not mandatory.",
+                        "format": "uuid"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": ["derived", "obsolete", "merged", "renamed", "similar"]
+                    }
+                }
+            }
+        },
+        "name": {
+            "type": "string",
+            "maxLength": 256
+        },
+        "taxonomy": {
+            "type": "string",
+            "maxLength": 256
+        },
+        "status": {
+            "type": "string",
+            "oneOf": [
+                { "const": "stable" },
+                { "const": "test" },
+                { "const": "experimental" },
+                { "const": "deprecated" },
+                { "const": "unsupported" }
+            ]
+        },
+        "description": {
+            "type": "string",
+            "maxLength": 65535
+        },
+        "license": {
+            "type": "string"
+        },
+        "author": {
+            "type": "string"
+        },
+        "references": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string" }
+        },
+        "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$"
+        },
+        "modified": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$"
+        },
+        "logsource": {
+            "type": "object",
+            "properties": {
+                "category": { "type": "string" },
+                "product": { "type": "string" },
+                "service": { "type": "string" },
+                "definition": { "type": "string" }
+            }
+        },
+        "detection": {
+            "type": "object",
+            "required": ["condition"],
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                { "type": "string" },
+                                { "type": "integer" },
+                                { "type": "object" }
+                            ]
+                        }
+                    },
+                    { "type": "object" }
+                ]
+            },
+            "properties": {
+                "condition": { "type": "string" }
+            }
+        },
+        "fields": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string" }
+        },
+        "falsepositives": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "type": "string", "minLength": 2 }
+        },
+        "level": {
+            "type": "string",
+            "oneOf": [
+                { "const": "informational" },
+                { "const": "low" },
+                { "const": "medium" },
+                { "const": "high" },
+                { "const": "critical" }
+            ]
+        },
+        "tags": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9_-]+\\.[a-z0-9._-]+$"
+            }
+        },
+        "scope": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 2 }
+        }
+    }
+}

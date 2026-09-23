@@ -38,7 +38,7 @@
                     "expected": { "type": "string" },
                     "indicators_met": { "type": "boolean" },
                     "request": {
-                        "type": "object",
+                        "type": ["object", "null"],
                         "required": ["method", "url", "sent_at"],
                         "properties": {
                             "method": { "type": "string" },
@@ -49,7 +49,7 @@
                         }
                     },
                     "response": {
-                        "type": "object",
+                        "type": ["object", "null"],
                         "required": ["status", "received_at"],
                         "properties": {
                             "status": { "type": "integer" },
