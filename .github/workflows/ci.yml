@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, types, tests, audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Sync toolchain
+        run: uv sync --extra dev
+      - name: Ruff lint
+        run: uv run ruff check src tests
+      - name: Ruff format check
+        run: uv run ruff format --check src tests
+      - name: mypy
+        run: uv run mypy src tests
+      - name: Unit tests (no Docker)
+        run: uv run pytest -m "not docker" --cov=custos_vulnerum --cov-report=term-missing
+      - name: Bandit
+        run: uv run bandit -r src -c pyproject.toml
+      # diskcache (PYSEC-2026-2447) is a dev-only transitive dependency of pySigma:
+      # all releases through 5.6.3 are affected and no fix exists upstream. It is not
+      # part of the shipped runtime dependency set. Revisit when a fix is released.
+      - name: pip-audit
+        run: uv run pip-audit --ignore-vuln PYSEC-2026-2447
+
+  sigma:
+    name: Sigma rule validation (SigmaHQ tooling)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Sync toolchain
+        run: uv sync --extra dev
+      - name: Rule contract tests (JSON schema + pySigma parse)
+        run: uv run pytest tests/test_sigma_rules.py
+      - name: Convert rules with sigma-cli + pySigma backend
+        run: uvx --from sigma-cli --with pysigma-backend-splunk sigma convert --without-pipeline -t splunk detection/sigma/ >/dev/null
+
+  docker-smoke:
+    name: Docker lab lifecycle smoke
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Sync toolchain
+        run: uv sync --extra dev
+      - name: Lifecycle smoke tests (up, verify, PoC, detect, mitigate, retest, report)
+        run: uv run pytest -m docker -v

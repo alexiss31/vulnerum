@@ -32,11 +32,15 @@ smoke: ## Docker end-to-end lifecycle smoke tests (skips when Docker is unavaila
 
 sigma: ## Validate Sigma rules with current SigmaHQ tooling
 	$(UV) run pytest tests/test_sigma_rules.py $(PYTEST_FLAGS)
-	uv --from sigma-cli --with pysigma-backend-splunk run sigma convert -t splunk detection/sigma/ >/dev/null
+	uvx --from sigma-cli --with pysigma-backend-splunk sigma convert --without-pipeline -t splunk detection/sigma/ >/dev/null
 
+# Task target `audit` passes `--ignore-vuln PYSEC-2026-2447` (diskcache, pulled in by
+# the dev-only pySigma dependency): no fixed release exists upstream (all versions
+# through 5.6.3 are affected) and diskcache is not part of the shipped runtime
+# dependency set. Revisit when a fixed diskcache release lands.
 audit: ## Bandit security lint + pip-audit dependency audit
 	$(UV) run bandit -r src -c pyproject.toml
-	$(UV) run pip-audit
+	$(UV) run pip-audit --ignore-vuln PYSEC-2026-2447
 
 ci: lint typecheck unit sigma audit ## Full local CI gate (everything except Docker smoke)
 
