@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vulnerability Lifecycle Report — {{ lab.cve }}</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: ui-sans-serif, system-ui, sans-serif; max-width: 60rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; }
+  h1, h2 { line-height: 1.25; }
+  code { background: rgba(127,127,127,.15); padding: .1rem .3rem; border-radius: .25rem; font-size: .9em; }
+  pre { background: rgba(127,127,127,.12); padding: .75rem; border-radius: .4rem; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid rgba(127,127,127,.4); padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  .meta { color: rgba(127,127,127,.9); font-size: .9em; }
+  .verdict { font-weight: 700; }
+  .ok { color: #1a7f37; } .fail { color: #b42318; }
+</style>
+</head>
+<body>
+<h1>Vulnerability Lifecycle Report — {{ lab.cve }}</h1>
+<p><strong>{{ lab.title }}</strong> · severity <strong>{{ lab.severity }}</strong>
+(CVSS {{ lab.cvss }}) · {{ lab.component }} ({{ lab.vendor }})</p>
+<p class="meta">Affected <code>{{ lab.affected_versions }}</code> · Fixed <code>{{ lab.fixed_versions }}</code><br>
+Generated {{ generated_at }} by Custos Vulnerum {{ tool_version }}</p>
+
+<h2>Verdict</h2>
+<table>
+<tr><th>Stage</th><th>Environment</th><th>Result</th><th>Evidence</th></tr>
+<tr><td>Verify (vulnerable)</td><td>vulnerable</td><td>{{ verify_vulnerable.passed if verify_vulnerable else "not run" }}</td><td>{{ (verify_vulnerable.checks | length ~ " checks") if verify_vulnerable else "—" }}</td></tr>
+<tr><td>PoC</td><td>{{ poc_run.environment if poc_run else "—" }}</td><td class="verdict">{{ poc_run.result if poc_run else "not run" }}</td><td>{% if poc_run %}<code>{{ poc_run.run_id }}</code>{% else %}—{% endif %}</td></tr>
+<tr><td>Detect</td><td>{{ poc_run.environment if poc_run else "—" }}</td><td>{{ (poc_run.detections | length ~ " rule(s) matched") if poc_run else "not run" }}</td><td>{% if poc_run %}<code>{{ poc_run.run_id }}</code>{% else %}—{% endif %}</td></tr>
+<tr><td>Verify (mitigated)</td><td>mitigated</td><td>{{ verify_mitigated.passed if verify_mitigated else "not run" }}</td><td>{{ (verify_mitigated.checks | length ~ " checks") if verify_mitigated else "—" }}</td></tr>
+<tr><td>Retest</td><td>{{ retest_run.environment if retest_run else "—" }}</td><td class="verdict">{{ retest_run.result if retest_run else "not run" }}</td><td>{% if retest_run %}<code>{{ retest_run.run_id }}</code>{% else %}—{% endif %}</td></tr>
+</table>
+{% if mitigation_effective %}
+<p><strong>Mitigation effective: {{ mitigation_effective }}</strong>
+(PoC {{ poc_run.result }} → retest {{ retest_run.result }}).</p>
+{% else %}
+<p>Mitigation not retested in this artifact set.</p>
+{% endif %}
+
+<h2>Vulnerability</h2>
+<p>{{ lab.summary }}</p>
+
+<h2>Verification checks</h2>
+{% if verify_vulnerable %}
+<table>
+<tr><th>Check</th><th>Expected</th><th>Observed</th><th>Pass</th></tr>
+{% for check in verify_vulnerable.checks %}
+<tr><td>{{ check.description }}</td><td><code>{{ check.expected }}</code></td><td><code>{{ check.observed }}</code></td><td class="{{ 'ok' if check.passed else 'fail' }}">{{ "yes" if check.passed else "NO" }}</td></tr>
+{% endfor %}
+</table>
+{% else %}
+<p>Not run — <code>custos verify {{ lab.id }}</code>.</p>
+{% endif %}
+
+<h2>Controlled PoC — evidence</h2>
+{% if poc_run %}
+<p class="meta">Run <code>{{ poc_run.run_id }}</code> · token <code>{{ poc_run.token }}</code> · started {{ poc_run.started_at }}</p>
+{% for step in poc_run.steps %}
+<h3>{{ loop.index }}. {{ step.name }} ({{ step.role }})</h3>
+<p>{{ step.description }}</p>
+<ul>
+<li><strong>Request</strong>: {% if step.request %}<code>{{ step.request.method }} {{ step.request.url }}</code>{% else %}—{% endif %}</li>
+{% if step.request and step.request.body_excerpt %}
+<li><strong>Body</strong>: <code>{{ step.request.body_excerpt }}</code></li>
+{% endif %}
+<li><strong>Expected</strong>: {{ step.expected }}</li>
+<li><strong>Result</strong>: {% if step.response %}HTTP {{ step.response.status }} {% endif %}{% if step.canary %}canary {{ "hit" if step.canary.matched else "silent" }} {% endif %}· indicators <span class="{{ 'ok' if step.indicators_met else 'fail' }}">{{ "MET" if step.indicators_met else "not met" }}</span></li>
+{% if step.response and step.response.body_excerpt %}
+<li><strong>Response excerpt</strong>: <code>{{ step.response.body_excerpt[:400] }}</code></li>
+{% endif %}
+{% for excerpt in step.logs %}
+{% if excerpt.lines %}
+<li><strong>Logs ({{ excerpt.service }})</strong>
+<ul>
+{% for line in excerpt.lines[:5] %}
+<li><code>{{ line[:300] }}</code></li>
+{% endfor %}
+</ul>
+</li>
+{% endif %}
+{% endfor %}
+</ul>
+{% endfor %}
+{% else %}
+<p>Not run — <code>custos run {{ lab.id }}</code>.</p>
+{% endif %}
+
+<h2>Detection</h2>
+{% if detections %}
+<table>
+<tr><th>Rule</th><th>Title</th><th>Level</th><th>Matched identifiers</th><th>ATT&amp;CK</th></tr>
+{% for d in detections %}
+<tr><td><code>{{ d.rule_id[:8] }}…</code></td><td>{{ d.rule_title }}</td><td>{{ d.rule_level }}</td><td>{{ d.matched_identifiers | join(", ") }}</td><td>{{ d.technique_ids | join(", ") }}</td></tr>
+{% endfor %}
+</table>
+{% else %}
+<p>Not run — <code>custos detect {{ lab.id }}</code>.</p>
+{% endif %}
+
+<h2>MITRE ATT&amp;CK</h2>
+<table>
+<tr><th>Technique</th><th>Name</th><th>Tactic</th><th>Source</th></tr>
+{% for t in techniques %}
+<tr><td><a href="{{ t.url }}">{{ t.technique_id }}</a></td><td>{{ t.name }}</td><td>{{ t.tactic_name }} ({{ t.tactic_id }})</td><td>{{ t.source }}</td></tr>
+{% endfor %}
+</table>
+
+<h2>Mitigation and retest</h2>
+{{ mitigation_text | e | replace('\n', '<br>') | safe }}
+
+<h2>Safety</h2>
+<ul>
+<li>All lab services published on <code>127.0.0.1</code> only (verified at run time).</li>
+<li>PoC traffic sent only to containers labelled <code>io.custos.*</code> and launched by this tool.</li>
+<li>Fixed payloads per lab; no arbitrary targets, commands or scanning.</li>
+<li>Lab networks isolated; the Log4Shell callback targets an in-network canary.</li>
+</ul>
+
+<h2>Provenance</h2>
+<ul>
+<li>Evidence: <code>evidence.json</code> in this directory.</li>
+<li>Detections: <code>detections.json</code> (Sigma rules: <code>detection/sigma/</code>).</li>
+<li>ATT&amp;CK values: <code>src/custos_vulnerum/data/attack_techniques.json</code>.</li>
+</ul>
+</body>
+</html>

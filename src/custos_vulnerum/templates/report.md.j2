@@ -1,0 +1,110 @@
+# Vulnerability Lifecycle Report — {{ lab.cve }}
+
+**{{ lab.title }}** · severity **{{ lab.severity }}** (CVSS {{ lab.cvss }}) · {{ lab.component }} ({{ lab.vendor }})
+
+Affected: `{{ lab.affected_versions }}` · Fixed: `{{ lab.fixed_versions }}`
+
+Generated {{ generated_at }} by Custos Vulnerum {{ tool_version }}.
+
+## Verdict
+
+| Stage | Environment | Result | Evidence |
+|---|---|---|---|
+| Verify (vulnerable) | vulnerable | {{ verify_vulnerable.passed if verify_vulnerable else "not run" }} | {% if verify_vulnerable %}{{ verify_vulnerable.checks | length }} checks{% else %}—{% endif %} |
+| PoC | {{ poc_run.environment if poc_run else "—" }} | **{{ poc_run.result if poc_run else "not run" }}** | {% if poc_run %}`{{ poc_run.run_id }}`{% else %}—{% endif %} |
+| Detect | {{ poc_run.environment if poc_run else "—" }} | {{ (poc_run.detections | length ~ " rule(s) matched") if poc_run else "not run" }} | {% if poc_run %}`{{ poc_run.run_id }}`{% else %}—{% endif %} |
+| Verify (mitigated) | mitigated | {{ verify_mitigated.passed if verify_mitigated else "not run" }} | {% if verify_mitigated %}{{ verify_mitigated.checks | length }} checks{% else %}—{% endif %} |
+| Retest | {{ retest_run.environment if retest_run else "—" }} | **{{ retest_run.result if retest_run else "not run" }}** | {% if retest_run %}`{{ retest_run.run_id }}`{% else %}—{% endif %} |
+
+{% if mitigation_effective %}
+**Mitigation effective: {{ mitigation_effective }}** (PoC {{ poc_run.result }} → retest {{ retest_run.result }}).
+{% else %}
+Mitigation not retested in this artifact set.
+{% endif %}
+
+## Vulnerability
+
+{{ lab.summary }}
+
+## Verification checks
+
+{% if verify_vulnerable %}
+| Check | Expected | Observed | Pass |
+|---|---|---|---|
+{% for check in verify_vulnerable.checks %}
+| {{ check.description }} | `{{ check.expected }}` | `{{ check.observed }}` | {{ "yes" if check.passed else "NO" }} |
+{% endfor %}
+{% else %}
+Not run — `custos verify {{ lab.id }}`.
+{% endif %}
+
+## Controlled PoC — evidence
+
+{% if poc_run %}
+Run `{{ poc_run.run_id }}` · token `{{ poc_run.token }}` · started {{ poc_run.started_at }}.
+
+{% for step in poc_run.steps %}
+### {{ loop.index }}. {{ step.name }} ({{ step.role }})
+
+{{ step.description }}
+
+- **Request**: {% if step.request %}`{{ step.request.method }} {{ step.request.url }}`{% else %}—{% endif %}
+{% if step.request and step.request.body_excerpt %}
+- **Body**: `{{ step.request.body_excerpt }}`
+{% endif %}
+- **Expected**: {{ step.expected }}
+- **Result**: {% if step.response %}HTTP {{ step.response.status }}{% endif %}{% if step.canary %}canary {{ "hit" if step.canary.matched else "silent" }}{% endif %} · indicators {{ "MET" if step.indicators_met else "not met" }}
+{% if step.response and step.response.body_excerpt %}
+- **Response excerpt**: `{{ step.response.body_excerpt[:400] }}`
+{% endif %}
+{% for excerpt in step.logs %}
+{% if excerpt.lines %}
+- **Logs ({{ excerpt.service }})**:
+{% for line in excerpt.lines[:5] %}
+  - `{{ line[:300] }}`
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% endfor %}
+{% else %}
+Not run — `custos run {{ lab.id }}`.
+{% endif %}
+
+## Detection
+
+{% if detections %}
+| Rule | Title | Level | Matched identifiers | ATT&CK |
+|---|---|---|---|---|
+{% for d in detections %}
+| `{{ d.rule_id[:8] }}…` | {{ d.rule_title }} | {{ d.rule_level }} | {{ d.matched_identifiers | join(", ") }} | {{ d.technique_ids | join(", ") }} |
+{% endfor %}
+{% else %}
+Not run — `custos detect {{ lab.id }}`.
+{% endif %}
+
+## MITRE ATT&CK
+
+| Technique | Name | Tactic | Source |
+|---|---|---|---|
+{% for t in techniques %}
+| [{{ t.technique_id }}]({{ t.url }}) | {{ t.name }} | {{ t.tactic_name }} ({{ t.tactic_id }}) | {{ t.source }} |
+{% endfor %}
+
+## Mitigation and retest
+
+{{ mitigation_text }}
+
+## Safety
+
+- All lab services published on `127.0.0.1` only (verified at run time).
+- PoC traffic sent only to containers labelled `io.custos.*` and launched by this tool.
+- Fixed payloads per lab; no arbitrary targets, commands or scanning.
+- Lab networks isolated (`internal: true` where possible); the Log4Shell callback
+  targets an in-network canary, never an external host.
+
+## Provenance
+
+- Evidence: `evidence.json` in this directory (schema: `specs/001-vulnerum-core/contracts/evidence.schema.json`).
+- Detections: `detections.json` in this directory (Sigma rules: `detection/sigma/`).
+- ATT&CK values: `src/custos_vulnerum/data/attack_techniques.json` (live ATT&CK transcription).
