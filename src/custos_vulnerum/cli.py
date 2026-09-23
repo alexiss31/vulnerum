@@ -106,10 +106,18 @@ def lab_up(
         False, "--mitigated", help="Launch the mitigated (patched) variant instead."
     ),
 ) -> None:
-    """Launch a lab in Docker and wait until it answers on loopback."""
+    """Launch a lab in Docker and wait until it answers on loopback.
+
+    One variant runs at a time (both publish the same loopback port): launching one
+    tears the other down first.
+    """
     try:
         lab = get_lab(_paths(), lab_id)
         env = lifecycle_mod.LabEnvironment(lab, "mitigated" if mitigated else "vulnerable")
+        other = lifecycle_mod.LabEnvironment(lab, "vulnerable" if mitigated else "mitigated")
+        if other.is_running():
+            other.down()
+            console.print(f"[yellow]replace[/yellow] stopped {lab.id} ({other.variant})")
         env.up()
         env.wait_ready()
     except CustosError as exc:

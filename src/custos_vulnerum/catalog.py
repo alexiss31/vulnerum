@@ -31,6 +31,13 @@ class LoadedLab:
         path = self.directory / name
         return path
 
+    def compose_files(self, mitigated: bool) -> tuple[Path, ...]:
+        """Compose files for a variant: base file, plus the mitigated override."""
+        base = self.directory / self.meta.compose.file
+        if mitigated:
+            return (base, self.directory / self.meta.compose.mitigated_file)
+        return (base,)
+
     def mitigation_path(self) -> Path:
         return self.directory / self.meta.mitigation_notes
 

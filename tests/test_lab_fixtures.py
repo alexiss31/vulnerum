@@ -57,9 +57,9 @@ def test_apache_fixture_lines_trigger_traversal_rule(apache_lab: Any, repo_paths
     assert not any("/manual/" in line for line in matched)
 
 
-def test_solr_fixture_lines_trigger_log4shell_rule(log4j_lab: Any, repo_paths: Paths) -> None:
+def test_app_fixture_lines_trigger_log4shell_rule(log4j_lab: Any, repo_paths: Paths) -> None:
     rule = _rule(repo_paths, "web_cve_2021_44228_log4shell_jndi_lookup.yml")
-    lines = _read_lines(log4j_lab.directory / "fixtures" / "sample_solr_log.txt")
+    lines = _read_lines(log4j_lab.directory / "fixtures" / "sample_app_log.txt")
     events = _message_events(lines, log4j_lab.meta.logsource)
     results = match_events([rule], events)
     matched = [result.event["message"] for result in results]

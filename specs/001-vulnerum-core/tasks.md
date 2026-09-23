@@ -28,7 +28,7 @@ Checkboxes are checked as implementation lands (all checked at release).
 ## Phase 2 — Labs (data only)
 
 - [x] T014 · P · US1 · FR-003 · `labs/cve-2021-41773/`: Dockerfile (httpd:2.4.49 + vulhub-adapted config), compose (+isolated net, loopback port, labels), compose.mitigated (httpd:2.4.51), lab.yaml, mitigation.md, fixtures
-- [x] T015 · P · US1 · FR-003 · `labs/cve-2021-44228/`: compose (solr:8.11.0 + in-network LDAP canary), compose.mitigated (log4j lookups disabled), canary image, lab.yaml, mitigation.md, fixtures
+- [x] T015 · P · US1 · FR-003 · `labs/cve-2021-44228/`: minimal vulnerable log4j 2.14.1 webapp (stock jars) + in-network minimal LDAP canary, mitigated variant (JndiLookup removed), lab.yaml, mitigation.md, fixtures
 - [x] T016 · P · Setup · FR-004 · `labs/_template/` + `labs/README.md` authoring guide (loadable, skipped by discovery)
 
 ## Phase 3 — Detection content

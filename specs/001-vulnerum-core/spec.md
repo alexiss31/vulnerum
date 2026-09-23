@@ -96,7 +96,7 @@ and the retest outcome with evidence.
 
 - **FR-001**: The product is a Python 3.12 CLI `custos` with commands `list`, `lab up <id> [--mitigated]`, `lab down <id>`, `verify <id>`, `run <id> [--retest]`, `detect <id>`, `report <id>`.
 - **FR-002**: Each lab lives in `labs/<cve>/` and owns its Compose files, `lab.yaml` metadata, `fixtures/` and `mitigation.md`; core orchestration is lab-agnostic.
-- **FR-003**: Two deterministic labs ship: CVE-2021-41773 (Apache HTTP Server 2.4.49) and CVE-2021-44228 (Log4Shell on Solr 8.11.0 / Log4j 2.14.1).
+- **FR-003**: Two deterministic labs ship: CVE-2021-41773 (Apache HTTP Server 2.4.49) and CVE-2021-44228 (Log4Shell via Log4j 2.14.1 in a minimal vulnerable webapp).
 - **FR-004**: A documented lab template (`labs/_template/`) allows adding a CVE without touching `src/custos_vulnerum/`.
 - **FR-005**: Safety: all published ports bind `127.0.0.1`; lab networks are isolated; PoCs run only against Custos-managed labelled containers; payloads are fixed per lab.
 - **FR-006**: PoC runs write normalized evidence (timestamp, request, selected logs, result, matched rule, ATT&CK IDs) to generated `artifacts/`; runtime artifacts are git-ignored except tiny tracked fixtures.
@@ -132,7 +132,9 @@ and the retest outcome with evidence.
 - Docker Engine with the Compose v2 plugin is available for lab commands; everything else works without it.
 - Labs target `127.0.0.1` on fixed high ports (8917 for CVE-2021-41773, 8986 for CVE-2021-44228) chosen to avoid common local services.
 - The Log4Shell PoC proves exploitation by the JNDI lookup reaching a lab-internal LDAP canary; it deliberately does not deliver a remote class (no code execution payload).
-- Vulnerable images are pinned (`httpd:2.4.49`, `solr:8.11.0`); the mitigated Apache variant pins `httpd:2.4.51` (first fully patched release).
+- Vulnerable builds are pinned (`httpd:2.4.49`, stock log4j 2.14.1 jars from Maven
+  Central on `eclipse-temurin:11-jdk`); the mitigated Apache variant pins `httpd:2.4.51`
+  (first fully patched release).
 - Wazuh integration is documented, not orchestrated.
 
 ## Clarifications (resolved during /speckit-clarify)

@@ -24,15 +24,15 @@ requests returning 404 with no disclosure; report shows mitigation effective.
 
 ## Scenario 2 — full lifecycle, CVE-2021-44228 (~4 min)
 
-1. `uv run custos lab up cve-2021-44228` → Solr 8.11.0 at `http://127.0.0.1:8986`
+1. `uv run custos lab up cve-2021-44228` → vulnerable Log4j 2.14.1 webapp at `http://127.0.0.1:8986`
 2. `uv run custos verify cve-2021-44228` → PASS
 3. `uv run custos run cve-2021-44228` → `result: vulnerable` (LDAP canary captured the run token)
 4. `uv run custos detect cve-2021-44228` → log4shell rules matched
-5. `uv run custos lab up cve-2021-44228 --mitigated` → lookups disabled variant up
+5. `uv run custos lab up cve-2021-44228 --mitigated` → JndiLookup removed variant up
 6. `uv run custos run cve-2021-44228 --retest` → `result: not_vulnerable` (canary silent)
 7. `uv run custos report cve-2021-44228`
 
-Expected: step 3 canary evidence contains the run token from the JNDI LDAP query; step 6
+Expected: step 3 canary evidence contains the run token from the LDAP search base; step 6
 canary evidence is empty; report maps T1190 and cites `mitigation.md`.
 
 ## Scenario 3 — quality gates (~2 min, no Docker)

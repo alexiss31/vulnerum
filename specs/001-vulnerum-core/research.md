@@ -82,13 +82,41 @@ All sources inspected 2026-09-23 (live fetches, not memory). License audit inclu
   arbitrary commands). Mitigated variant = `httpd:2.4.51` (first fully patched release
   for the 2.4.49 traversal family).
 - CVE-2021-44228 proof = JNDI `ldap:` lookup captured by an **in-network canary
-  service** (the payload references `canary:1389` inside the isolated lab network —
+  service** (the payload references the canary service inside the isolated lab network —
   nothing points off-box). The PoC deliberately stops at "lookup happened": no remote
-  class loading, no code execution. Mitigated variant = Log4j message lookups disabled
-  (`log4j2.formatMsgNoLookups=true`), verified empirically by retest (no canary hit).
+  class loading, no code execution. Mitigated variant = the vendor-neutral Apache
+  advisory fix (JndiLookup class removed from log4j-core), verified empirically by
+  retest (no canary hit).
 - Log4Shell detection is written against both the request indicators (`${jndi:` in
-  path/user-agent/body) and the canary/JNDI error logs, matching ATT&CK DET0080's
-  multi-signal idea.
+  path/user-agent/body, raw and URL-encoded) and the canary/JNDI signals, matching
+  ATT&CK DET0080's multi-signal idea.
+
+## Lab design decisions (verified empirically during implementation)
+
+- **Target app for CVE-2021-44228**: the official `solr:8.11.0` image bakes
+  `-Dlog4j2.formatMsgNoLookups=true` into its CMD and its log4j build does not resolve
+  message-time lookups even when the flag is removed (verified against the shipped
+  classes and live requests). The lab therefore ships a minimal webapp built against
+  **stock log4j 2.14.1 jars from Maven Central** — the vulhub Log4Shell README
+  explicitly allows "an application that depends on Log4j2" as the demonstrator.
+- **Payload shape**: the JDK's `HttpServer` rejects raw `{`/`}` in request URIs
+  ("Bad request URI"), so the query payload travels URL-encoded (the classic evasion
+  form) while the User-Agent keeps the raw form. The app logs the decoded input —
+  both forms are covered by the Sigma rule.
+- **LDAP canary**: JNDI clients open with a 14-byte anonymous LDAP bind and wait for a
+  bind response before sending the search request that carries the looked-up name (and
+  the run token). The canary is therefore a minimal LDAP responder (bind + search
+  answers) rather than a raw TCP sink, so the token-bearing bytes actually arrive.
+- **Network isolation**: `internal: true` compose networks disable published-port
+  forwarding entirely (verified: bindings declared but never activated). Labs use a
+  dedicated per-lab bridge with `host_binding_ipv4=127.0.0.1` and explicit loopback
+  publishes instead — same practical boundary, working port forwarding.
+- **Variant switching**: both variants publish the same loopback port, so `lab up` of
+  one variant replaces the other (recorded in `contracts/cli.md`).
+- **Pull wedge workaround (dev machine only)**: this project's Docker daemon had a
+  wedged image-pull path (registry pulls hang regardless of registry, local import/load
+  fine). Images were fetched with `skopeo copy` and `docker load`ed. This is not part
+  of the product; a clean checkout only needs a working Docker.
 
 ## Prose and presentation
 

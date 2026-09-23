@@ -7,9 +7,9 @@
 ![Sigma v2.1](https://img.shields.io/badge/Sigma-v2.1-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Everything runs against Docker labs bound to `127.0.0.1` on isolated networks. PoCs are
-fixed payloads that refuse to touch anything Custos Vulnerum did not launch — no
-scanning, no arbitrary targets. Read [SECURITY.md](SECURITY.md) first.
+Everything runs against Docker labs bound to `127.0.0.1` on isolated per-lab Docker
+networks. PoCs are fixed payloads that refuse to touch anything Custos Vulnerum did not
+launch — no scanning, no arbitrary targets. Read [SECURITY.md](SECURITY.md) first.
 
 ## Quickstart
 
@@ -54,7 +54,7 @@ flowchart LR
 | Lab | CVE | Component | Severity | Controlled PoC | Detection | Retest |
 |---|---|---|---|---|---|---|
 | `cve-2021-41773` | CVE-2021-41773 | Apache HTTP Server 2.4.49 | high (7.5) | traversal → `/etc/passwd` disclosure + CGI `echo;id` | Sigma: traversal in `http_path` | httpd 2.4.51 blocks both |
-| `cve-2021-44228` | CVE-2021-44228 | Log4j 2.14.1 via Solr 8.11.0 | critical (10.0) | `${jndi:ldap://…}` lookup captured by in-network canary | Sigma: payload in request + canary LDAP hit | JndiLookup removed → canary silent |
+| `cve-2021-44228` | CVE-2021-44228 | Log4j 2.14.1 (minimal vulnerable webapp) | critical (10.0) | `${jndi:ldap://…}` lookup captured by in-network LDAP canary | Sigma: payload in request/logs + canary LDAP hit | JndiLookup removed → canary silent |
 
 Add your own CVE without touching orchestration: copy `labs/_template/` and follow
 [`labs/README.md`](labs/README.md).
@@ -118,7 +118,8 @@ methodology backbone — the constitution, spec, plan and tasks live in
 
 - [vulhub/vulhub](https://github.com/vulhub/vulhub) (MIT) — reference lab setups for
   both CVEs; adaptations keep attribution in file headers. Upstream images used:
-  Apache httpd and Apache Solr/Log4j (Apache-2.0).
+  Apache httpd and Apache Log4j (Apache-2.0); the Log4Shell app builds on
+  Eclipse Temurin (GPLv2+Classpath Exception).
 - [SigmaHQ](https://github.com/SigmaHQ) — Sigma specification v2.1, pySigma and
   sigma-cli (rules are original; style follows the SigmaHQ conventions).
 - [MITRE ATT&CK](https://attack.mitre.org/) — technique content (T1190, T1059.004),

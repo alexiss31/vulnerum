@@ -5,8 +5,9 @@
 Custos Vulnerum is a **local lab tool**. It runs deliberately vulnerable software to
 demonstrate the vulnerability lifecycle, with safety enforced architecturally:
 
-- Vulnerable services publish ports on `127.0.0.1` only and run on isolated Docker
-  networks. `custos verify` re-verifies the bindings at runtime.
+- Vulnerable services publish ports on `127.0.0.1` only and run on isolated per-lab
+  Docker networks (dedicated bridge with `host_binding_ipv4=127.0.0.1`).
+  `custos verify` re-verifies the bindings at runtime.
 - PoC traffic is only sent to containers carrying the `io.custos.*` labels that this
   tool created. Any other target aborts with `SafetyError` before traffic is sent.
 - PoC payloads are constants of each lab. There is no way to point the tool at an

@@ -7,7 +7,7 @@ errors (Typer/Click default).
 | Command | Behavior | Writes |
 |---|---|---|
 | `custos list` | Rich table of labs: id, CVE, severity, component, status (down/running) | — |
-| `custos lab up <id> [--mitigated]` | `docker compose up -d` for the lab project (vulnerable or mitigated variant), waits for HTTP readiness | — |
+| `custos lab up <id> [--mitigated]` | `docker compose up -d` for the lab project (vulnerable or mitigated variant), waits for HTTP readiness. One variant runs at a time — both publish the same loopback port, so launching one tears the other down first | — |
 | `custos lab down <id>` | `docker compose down -v --remove-orphans` for all variants of the lab | — |
 | `custos verify <id> [--mitigated]` | Runs `verification` checks + safety re-verification (loopback bindings, managed labels); prints observed values; exit 1 if any check fails | — |
 | `custos run <id> [--retest]` | Safety gate → executes `poc.steps` → writes evidence run (`phase=poc` or `retest`) | `artifacts/<id>/<run>/evidence.json` |

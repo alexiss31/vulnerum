@@ -14,11 +14,12 @@ author: 'Alexis Heugas (Custos Vulnerum)'
 date: '2026-09-23'
 logsource:
     category: 'webserver'
-    product: 'solr'
-    service: 'solr'
+    product: 'log4j'
+    service: 'webapp'
     definition: >
-        Solr HTTP request logs. In Custos evidence this matches the normalized
-        http_path/http_user_agent/http_body fields of recorded PoC requests.
+        Request/application logs of a Log4j-based webapp. In Custos evidence this matches
+        the normalized http_path/http_user_agent/http_body/message fields of recorded
+        PoC requests and selected log lines.
 detection:
     selection_path_raw:
         http_path|contains: '${jndi'

@@ -80,7 +80,7 @@ def test_verification_body_contains(log4j_lab: Any, monkeypatch: Any) -> None:
     _stub_containers(monkeypatch, log4j_lab)
 
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, text='{"solr-spec-version":"8.11.0"}')
+        return httpx.Response(200, text="log4j-2.14.1 ok")
 
     report = run_verification(
         log4j_lab,
@@ -96,7 +96,7 @@ def test_verification_body_contains_absent_fails(log4j_lab: Any, monkeypatch: An
     _stub_containers(monkeypatch, log4j_lab)
 
     def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, text='{"solr-spec-version":"8.11.1"}')
+        return httpx.Response(200, text="log4j-2.17.1 ok")
 
     report = run_verification(
         log4j_lab,

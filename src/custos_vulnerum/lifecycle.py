@@ -56,6 +56,7 @@ class LabEnvironment:
         self.mitigated = variant == "mitigated"
         suffix = "-mit" if self.mitigated else ""
         self.project = f"{lab.meta.compose.project}{suffix}"
+        self.compose_files = lab.compose_files(self.mitigated)
         self.compose_file = lab.compose_file(self.mitigated)
 
     @property
@@ -65,15 +66,10 @@ class LabEnvironment:
     # -- compose plumbing ---------------------------------------------------
 
     def _compose(self, *args: str, timeout: float = _COMPOSE_TIMEOUT) -> str:
-        cmd = [
-            "docker",
-            "compose",
-            "-p",
-            self.project,
-            "-f",
-            str(self.compose_file),
-            *args,
-        ]
+        cmd = ["docker", "compose", "-p", self.project]
+        for compose_file in self.compose_files:
+            cmd += ["-f", str(compose_file)]
+        cmd += list(args)
         try:
             proc = subprocess.run(  # static argv, no shell  # nosec B603
                 cmd,
@@ -93,7 +89,9 @@ class LabEnvironment:
         return proc.stdout
 
     def up(self) -> None:
-        self._compose("up", "-d", "--remove-orphans", timeout=_COMPOSE_TIMEOUT)
+        # --build: lab sources may have changed since the last run; images are cheap
+        # to rebuild from cache and must never serve stale lab code.
+        self._compose("up", "-d", "--build", "--remove-orphans", timeout=_COMPOSE_TIMEOUT)
 
     def down(self) -> None:
         self._compose("down", "-v", "--remove-orphans", timeout=_COMPOSE_TIMEOUT)

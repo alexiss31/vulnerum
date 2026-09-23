@@ -101,7 +101,8 @@ def test_derive_events_lab_logsource_and_canary(log4j_lab: Any) -> None:
     canary_events = [e for e in events if e["source"] == "canary"]
     log_events = [e for e in events if e["source"] == "log"]
     assert request_events and log_events and canary_events
-    assert request_events[0]["product"] == "solr"
+    assert request_events[0]["product"] == "log4j"
+    assert request_events[0]["service"] == "webapp"
     assert request_events[0]["http_path"] == "/icons/.%2e/etc/passwd"
     assert canary_events[0]["product"] == "custos"
     assert canary_events[0]["service"] == "ldap_canary"
