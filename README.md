@@ -1,0 +1,133 @@
+# Custos Vulnerum
+
+**Run the whole vulnerability lifecycle on your own machine: launch a vulnerable lab, prove it, detect the exploit with Sigma, map it to MITRE ATT&CK, mitigate, retest — and export the evidence.**
+
+[![CI](https://github.com/alexiss31/custos-vulnerum/actions/workflows/ci.yml/badge.svg)](https://github.com/alexiss31/custos-vulnerum/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
+![Sigma v2.1](https://img.shields.io/badge/Sigma-v2.1-blue)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+Everything runs against Docker labs bound to `127.0.0.1` on isolated networks. PoCs are
+fixed payloads that refuse to touch anything Custos Vulnerum did not launch — no
+scanning, no arbitrary targets. Read [SECURITY.md](SECURITY.md) first.
+
+## Quickstart
+
+Prerequisites: Docker (with Compose v2) and [uv](https://docs.astral.sh/uv/).
+
+```bash
+git clone https://github.com/alexiss31/custos-vulnerum && cd custos-vulnerum
+uv sync --extra dev
+
+uv run custos lab up cve-2021-41773        # launch the vulnerable lab (loopback only)
+uv run custos verify cve-2021-41773        # version marker + safety re-check
+uv run custos run cve-2021-41773           # controlled PoC → evidence.json
+uv run custos detect cve-2021-41773        # Sigma rules → detections + ATT&CK
+uv run custos lab up cve-2021-41773 --mitigated   # patched variant (httpd 2.4.51)
+uv run custos run cve-2021-41773 --retest  # same PoC must now fail
+uv run custos report cve-2021-41773        # report.md + report.html
+```
+
+Repeat with `cve-2021-44228` (Log4Shell), or run everything: `make demo`.
+Clean up with `uv run custos lab down <id>`.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    CLI["custos CLI"] --> LC["lab lifecycle<br/>docker compose"]
+    CLI --> V["verify<br/>safety gate"]
+    CLI --> P["PoC runner<br/>fixed payloads"]
+    CLI --> D["detection<br/>Sigma subset"]
+    CLI --> R["report<br/>Jinja2"]
+    LC --> L["labs/&lt;cve&gt;/<br/>Compose · lab.yaml"]
+    P -- "managed 127.0.0.1 targets only" --> L
+    P --> E[("artifacts/<br/>evidence.json")]
+    E --> D
+    D --> A["ATT&CK mapping"]
+    A --> R
+    E --> R
+```
+
+## Supported labs
+
+| Lab | CVE | Component | Severity | Controlled PoC | Detection | Retest |
+|---|---|---|---|---|---|---|
+| `cve-2021-41773` | CVE-2021-41773 | Apache HTTP Server 2.4.49 | high (7.5) | traversal → `/etc/passwd` disclosure + CGI `echo;id` | Sigma: traversal in `http_path` | httpd 2.4.51 blocks both |
+| `cve-2021-44228` | CVE-2021-44228 | Log4j 2.14.1 via Solr 8.11.0 | critical (10.0) | `${jndi:ldap://…}` lookup captured by in-network canary | Sigma: payload in request + canary LDAP hit | JndiLookup removed → canary silent |
+
+Add your own CVE without touching orchestration: copy `labs/_template/` and follow
+[`labs/README.md`](labs/README.md).
+
+## Detection & report
+
+`custos run` writes normalized evidence (timestamp, request, selected logs, result) to
+`artifacts/<lab>/<run>/evidence.json`; `custos detect` matches the Sigma v2 rules in
+[`detection/sigma/`](detection/sigma/) and attaches MITRE ATT&CK technique IDs;
+`custos report` renders the full lifecycle into `report.md` + `report.html`:
+
+```text
+$ uv run custos run cve-2021-41773
+```
+
+*(Real captured output from the end-to-end run is embedded here — see "Testing & CI"
+to reproduce locally in minutes.)*
+
+The Wazuh adapter in [`detection/wazuh/`](detection/wazuh/) is optional — the demo
+never requires Wazuh.
+
+## Safety model
+
+- Vulnerable services publish ports on `127.0.0.1` only, on isolated Docker networks
+  (`internal: true` where possible) — verified at runtime by `custos verify`.
+- PoC steps run only against containers labelled `io.custos.*` and launched by this
+  tool; anything else aborts with `SafetyError` before a single packet is sent.
+- Payloads are constants of each lab (e.g. the fixed `echo;id`), never user input.
+  The Log4Shell callback is an in-network canary: the exploit is proven by the JNDI
+  lookup, code delivery is deliberately out of scope.
+
+## Testing & CI
+
+| Command | What it proves |
+|---|---|
+| `make unit` | unit suite (no Docker needed) |
+| `make smoke` | Docker end-to-end lifecycle per lab (skips without Docker) |
+| `make sigma` | Sigma rules parse + convert via current SigmaHQ tooling |
+| `make audit` | Bandit + pip-audit |
+| `make ci` | everything CI runs except the Docker smoke |
+
+CI (GitHub Actions) runs Ruff, mypy, pytest, Bandit, pip-audit and Sigma validation on
+every push, plus a Docker lifecycle smoke on `main`.
+
+## Project layout
+
+```text
+src/custos_vulnerum/   CLI, typed models, lifecycle, safety gate, PoC runner,
+                       evidence, Sigma-subset detector, ATT&CK mapping, reports
+labs/<cve>/            Compose (vulnerable + mitigated), lab.yaml, fixtures, mitigation.md
+detection/sigma/       Sigma v2 rules (validated with SigmaHQ tooling)
+detection/wazuh/       optional Wazuh custom-rule adapter
+specs/001-vulnerum-core/  constitution, spec, plan, tasks (Spec-Driven Development)
+```
+
+Built Spec-Driven with [github/spec-kit](https://github.com/github/spec-kit) as the
+methodology backbone — the constitution, spec, plan and tasks live in
+[`.specify/`](.specify/memory/constitution.md) and [`specs/`](specs/001-vulnerum-core/spec.md).
+
+## Acknowledgements
+
+- [vulhub/vulhub](https://github.com/vulhub/vulhub) (MIT) — reference lab setups for
+  both CVEs; adaptations keep attribution in file headers. Upstream images used:
+  Apache httpd and Apache Solr/Log4j (Apache-2.0).
+- [SigmaHQ](https://github.com/SigmaHQ) — Sigma specification v2.1, pySigma and
+  sigma-cli (rules are original; style follows the SigmaHQ conventions).
+- [MITRE ATT&CK](https://attack.mitre.org/) — technique content (T1190, T1059.004),
+  transcribed with source versions in `src/custos_vulnerum/data/attack_techniques.json`.
+- [Wazuh](https://wazuh.com/) — ruleset XML syntax for the optional adapter.
+- [github/spec-kit](https://github.com/github/spec-kit) (MIT) — Spec-Driven
+  Development process and templates.
+
+## License
+
+MIT for original code ([LICENSE](LICENSE)). Third-party material referenced or adapted
+keeps its own license and copyright.
