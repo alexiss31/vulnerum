@@ -323,7 +323,7 @@ def _parse_not(parser: _Parser) -> Any:
 def _parse_atom(parser: _Parser) -> Any:
     token = parser.take()
     lowered = token.lower()
-    if token == "(":  # nosec B105 - condition grammar token, not a credential
+    if token == "(":  # condition grammar token, not a credential  # nosec B105
         expr = _parse_or(parser)
         closing = parser.peek()
         if closing != ")":

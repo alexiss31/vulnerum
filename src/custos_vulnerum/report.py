@@ -48,9 +48,9 @@ def build_context(
 
 def render_reports(context: dict[str, Any]) -> tuple[str, str]:
     """Render (report.md, report.html) from one context."""
-    # nosec B701 on the Markdown env: Markdown output has no HTML context; the HTML
-    # environment below enables autoescape explicitly.
-    md_env = Environment(  # nosec B701
+    # B701 acknowledged: Markdown output has no HTML context; the HTML environment
+    # below enables autoescape explicitly.
+    md_env = Environment(  # markdown-only rendering  # nosec B701
         loader=FileSystemLoader(str(_TEMPLATE_DIR)),
         autoescape=False,
         trim_blocks=True,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-import subprocess  # nosec B404 - docker argv is static, never shell-interpreted
+import subprocess  # docker argv is static, never shell-interpreted  # nosec B404
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Literal
@@ -75,7 +75,7 @@ class LabEnvironment:
             *args,
         ]
         try:
-            proc = subprocess.run(  # nosec B603, B607 - static argv, no shell
+            proc = subprocess.run(  # static argv, no shell  # nosec B603
                 cmd,
                 cwd=self.lab.directory,
                 capture_output=True,
@@ -110,7 +110,7 @@ class LabEnvironment:
         if not ids:
             return []
         try:
-            proc = subprocess.run(  # nosec B603, B607 - static argv, no shell
+            proc = subprocess.run(  # static argv, no shell  # nosec B603, B607
                 ["docker", "inspect", *ids],
                 capture_output=True,
                 text=True,
