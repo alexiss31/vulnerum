@@ -1,0 +1,4 @@
+# Template lab — mitigated variant used for retesting (patched image or config).
+services:
+  app:
+    image: example/app:1.2.4

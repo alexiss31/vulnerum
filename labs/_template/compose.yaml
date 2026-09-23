@@ -1,0 +1,20 @@
+# Template lab — vulnerable variant. Loopback port + isolated network + labels.
+services:
+  app:
+    image: example/app:1.2.3
+    ports:
+      - "127.0.0.1:18080:8080"
+    networks:
+      - labnet
+    labels:
+      io.custos.project: "vulnerum"
+      io.custos.lab: "cve-0000-0000"
+      io.custos.role: "target"
+    restart: "no"
+
+networks:
+  labnet:
+    driver: bridge
+    internal: true
+    driver_opts:
+      com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"

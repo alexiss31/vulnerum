@@ -1,0 +1,24 @@
+title: 'Template Example — Suspicious Marker in Web Request'
+id: 6f0f2b3e-4d3a-4c1e-9a5b-1d2f3a4b5c6d
+status: 'experimental'
+description: 'Template rule showing the expected shape. Copy to detection/sigma/, rename, replace the selection with the real exploit indicators and give it a fresh UUID (uuidgen).'
+references:
+    - 'https://nvd.nist.gov/vuln/detail/CVE-0000-0000'
+author: 'Custos Vulnerum lab template'
+date: '2026-09-23'
+logsource:
+    category: 'webserver'
+    product: 'example'
+    service: 'app'
+    definition: 'Normalized request fields produced by `custos run` (see specs/001-vulnerum-core/data-model.md).'
+detection:
+    selection:
+        http_path|contains: '/fixed-payload-path'
+    condition: 'selection'
+falsepositives:
+    - 'Legitimate requests to the same path'
+level: 'high'
+tags:
+    - 'attack.initial_access'
+    - 'attack.t1190'
+    - 'cve.0000'

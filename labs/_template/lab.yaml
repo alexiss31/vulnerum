@@ -1,0 +1,73 @@
+# Template lab — copy me, then fill every field (see ../README.md).
+# The id must equal the directory name you copy this into.
+id: cve-0000-0000
+title: Short descriptive title of the vulnerability in the lab
+summary: >-
+  Two or three sentences: root cause, affected component, exploitation primitive and
+  what the lab's proof actually demonstrates.
+cve: CVE-0000-0000
+cvss: 0.0
+severity: medium # low | medium | high | critical
+vendor: Vendor name
+component: Component name
+affected_versions: "x.y.z"
+fixed_versions: "x.y.z+"
+references:
+  - https://nvd.nist.gov/vuln/detail/CVE-0000-0000
+attack:
+  - technique_id: T1190
+    role: how the technique maps to this lab's steps
+compose:
+  file: compose.yaml
+  mitigated_file: compose.mitigated.yaml
+  project: custos-cve-0000-0000
+  target_service: app
+  port: 18080
+  container_port: 8080
+logsource:
+  category: webserver
+  product: example
+  service: app
+  definition: What real logs these normalized events mirror (fields used by the Sigma rule).
+verification:
+  - kind: http_status
+    value: "200"
+    path: /
+    description: service answers
+  - kind: body_contains
+    value: 1.2.3
+    path: /version
+    description: version marker of the vulnerable release
+poc:
+  steps:
+    - type: http
+      name: baseline
+      role: act
+      method: GET
+      path: /
+      expect_status: [200]
+      description: sanity — the service is up
+    - type: http
+      name: exploit-proof
+      role: proof
+      method: GET
+      path: /fixed-payload-path
+      expect_status: [200]
+      expect_body: ["fixed indicator that equals exploitable"]
+      description: fixed payload; indicators met == vulnerable
+    # Optional canary proof (requires a canary: block and a canary/ build context):
+    # - type: canary_ldap
+    #   name: callback-captured
+    #   role: proof
+    #   timeout_seconds: 15
+    #   description: the target performed the outbound lookup to the in-network canary
+evidence:
+  log_rules:
+    - service: app
+      contains: ["ERROR", "exploit-marker"]
+      max_lines: 20
+detection_rules:
+  # Copy labs/_template/detection_example.yml to detection/sigma/<your-rule>.yml,
+  # rename, edit, uuidgen a fresh id — then list it here:
+  - sigma/web_cve_0000_0000_template_example.yml
+mitigation_notes: mitigation.md
