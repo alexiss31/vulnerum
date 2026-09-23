@@ -1,4 +1,4 @@
-# Implementation Plan: Custos Vulnerum — Local Vulnerability Lifecycle
+# Implementation Plan: Vulnerum — Local Vulnerability Lifecycle
 
 **Branch**: `001-vulnerum-core` | **Date**: 2026-09-23 | **Spec**: [spec.md](spec.md)
 

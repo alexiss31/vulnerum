@@ -1,4 +1,4 @@
-"""Custos Vulnerum: the local vulnerability lifecycle, from lab to report."""
+"""Vulnerum: the local vulnerability lifecycle, from lab to report."""
 
 from __future__ import annotations
 

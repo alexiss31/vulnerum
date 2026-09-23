@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema#",
-    "$id": "https://github.com/alexiss31/custos-vulnerum/specs/001-vulnerum-core/contracts/evidence.schema.json",
-    "title": "Custos Vulnerum evidence run",
+    "$id": "https://github.com/alexiss31/vulnerum/specs/001-vulnerum-core/contracts/evidence.schema.json",
+    "title": "Vulnerum evidence run",
     "type": "object",
     "required": [
         "schema_version",

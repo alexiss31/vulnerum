@@ -1,6 +1,6 @@
 """Constitution I enforcement: loopback-only reachability, managed containers only.
 
-Nothing in Custos Vulnerum sends traffic anywhere else. Every request is addressed to
+Nothing in Vulnerum sends traffic anywhere else. Every request is addressed to
 ``127.0.0.1`` on a port published by a lab container that this tool launched and
 labelled. This module is the single gate in front of any network send.
 """
@@ -62,7 +62,7 @@ def assert_managed(env: LabEnvironment) -> list[ContainerInfo]:
         lab_label = container.labels.get(MANAGED_LABEL_LAB)
         if project_label != MANAGED_PROJECT_VALUE or lab_label != env.lab.id:
             raise SafetyError(
-                f"container {container.name!r} is not a Custos Vulnerum container "
+                f"container {container.name!r} is not a Vulnerum container "
                 f"({MANAGED_LABEL_PROJECT}={project_label!r}, "
                 f"{MANAGED_LABEL_LAB}={lab_label!r}) — refusing"
             )

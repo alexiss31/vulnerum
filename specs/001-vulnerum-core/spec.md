@@ -1,4 +1,4 @@
-# Feature Specification: Custos Vulnerum — Local Vulnerability Lifecycle
+# Feature Specification: Vulnerum — Local Vulnerability Lifecycle
 
 **Feature Branch**: `001-vulnerum-core`
 

@@ -45,7 +45,7 @@ from .models import DetectionMatch
 
 app = typer.Typer(
     help=(
-        "Custos Vulnerum — local vulnerability lifecycle: "
+        "Vulnerum — local vulnerability lifecycle: "
         "launch, verify, run a controlled PoC, collect evidence, detect with Sigma, "
         "map MITRE ATT&CK, mitigate and retest. Labs bind to 127.0.0.1 only."
     ),
@@ -90,7 +90,7 @@ def list_labs() -> None:
     except CustosError as exc:
         _fail(str(exc))
         return
-    table = Table(title="Custos Vulnerum labs", show_header=True)
+    table = Table(title="Vulnerum labs", show_header=True)
     for column in ("ID", "CVE", "Severity", "Component", "Port", "Status"):
         table.add_column(column)
     for lab in labs:

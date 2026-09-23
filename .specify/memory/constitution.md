@@ -1,4 +1,4 @@
-# Custos Vulnerum Constitution
+# Vulnerum Constitution
 
 Spec-Driven Development backbone for this repository, following
 [github/spec-kit](https://github.com/github/spec-kit) (`.specify/memory/constitution.md`).
@@ -8,7 +8,7 @@ Spec-Driven Development backbone for this repository, following
 ### I. Safety Is Architectural
 
 Vulnerable services bind to `127.0.0.1` only. Lab containers run on isolated Docker
-networks. PoC steps run only against containers that Custos Vulnerum itself launched and
+networks. PoC steps run only against containers that Vulnerum itself launched and
 labelled (`io.custos.*`). Payloads are fixed per lab: no arbitrary commands, no arbitrary
 targets, no Internet scanning, no generic exploitation. `custos_vulnerum.safety` enforces
 this before any request is sent; `custos verify` re-verifies bindings at runtime. Any

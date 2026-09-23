@@ -1,5 +1,5 @@
 [project]
-name = "custos-vulnerum"
+name = "vulnerum"
 version = "0.1.0"
 description = "Run the local vulnerability lifecycle end to end: launch, verify, controlled PoC, evidence collection, Sigma detection, MITRE ATT&CK mapping, mitigation and retest."
 readme = "README.md"
@@ -45,9 +45,9 @@ dev = [
 custos = "custos_vulnerum.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/alexiss31/custos-vulnerum"
-Repository = "https://github.com/alexiss31/custos-vulnerum"
-Issues = "https://github.com/alexiss31/custos-vulnerum/issues"
+Homepage = "https://github.com/alexiss31/vulnerum"
+Repository = "https://github.com/alexiss31/vulnerum"
+Issues = "https://github.com/alexiss31/vulnerum/issues"
 
 [build-system]
 requires = ["hatchling"]

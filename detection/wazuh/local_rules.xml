@@ -1,9 +1,9 @@
 <!--
-  Optional Wazuh adapter for Custos Vulnerum (the default demo does NOT need Wazuh).
+  Optional Wazuh adapter for Vulnerum (the default demo does NOT need Wazuh).
 
   These rules mirror the Sigma rules in ../sigma/ using Wazuh's ruleset XML syntax and
   match on the raw log line, so they work without a custom decoder. Author: Alexis
-  Heugas (Custos Vulnerum), MIT like the rest of the original code.
+  Heugas (Vulnerum), MIT like the rest of the original code.
 
   Install (bare manager):
     1. Merge into /var/ossec/etc/rules/local_rules.xml on the Wazuh manager.

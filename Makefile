@@ -1,4 +1,4 @@
-# Custos Vulnerum task runner.
+# Vulnerum task runner.
 # All targets run through `uv`; see README.md "Testing & CI" for the pipeline map.
 
 UV ?= uv

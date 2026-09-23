@@ -1,6 +1,6 @@
 # Optional Wazuh adapter
 
-The default Custos Vulnerum demo **does not require Wazuh**. This directory maps the
+The default Vulnerum demo **does not require Wazuh**. This directory maps the
 lab detections into Wazuh's ruleset for teams running `wazuh/wazuh-docker` or a bare
 Wazuh manager.
 

@@ -4,7 +4,7 @@ status: 'experimental'
 description: 'Template rule showing the expected shape. Copy to detection/sigma/, rename, replace the selection with the real exploit indicators and give it a fresh UUID (uuidgen).'
 references:
     - 'https://nvd.nist.gov/vuln/detail/CVE-0000-0000'
-author: 'Custos Vulnerum lab template'
+author: 'Vulnerum lab template'
 date: '2026-09-23'
 logsource:
     category: 'webserver'

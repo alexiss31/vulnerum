@@ -1,4 +1,4 @@
-# Tasks: Custos Vulnerum — Local Vulnerability Lifecycle
+# Tasks: Vulnerum — Local Vulnerability Lifecycle
 
 Feature: `001-vulnerum-core` · Input: [plan.md](plan.md), [research.md](research.md),
 [data-model.md](data-model.md), [contracts/](contracts/)
@@ -44,7 +44,7 @@ Checkboxes are checked as implementation lands (all checked at release).
 - [x] T022 · P · US1-4 · FR-009/FR-013 · README.md (60s scan) + SECURITY.md (safety model)
 - [x] T023 · US1-4 · SC-001 · End-to-end run on Docker for both labs: capture real outputs for README, fix failures
 - [x] T024 · US1-4 · SC-003 · Clean-checkout verification (`make ci`) + hygiene audit (secrets, unsafe ports, dead docs, generated junk)
-- [x] T025 · US1-4 · FR-012 · Conventional commit history; publish `alexiss31/custos-vulnerum` public on `main`; verify README + Actions state
+- [x] T025 · US1-4 · FR-012 · Conventional commit history; publish `alexiss31/vulnerum` public on `main`; verify README + Actions state
 
 ## Dependency notes
 

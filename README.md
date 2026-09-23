@@ -1,14 +1,14 @@
-# Custos Vulnerum
+# Vulnerum
 
 **Run the whole vulnerability lifecycle on your own machine: launch a vulnerable lab, prove it, detect the exploit with Sigma, map it to MITRE ATT&CK, mitigate, retest — and export the evidence.**
 
-[![CI](https://github.com/alexiss31/custos-vulnerum/actions/workflows/ci.yml/badge.svg)](https://github.com/alexiss31/custos-vulnerum/actions/workflows/ci.yml)
+[![CI](https://github.com/alexiss31/vulnerum/actions/workflows/ci.yml/badge.svg)](https://github.com/alexiss31/vulnerum/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue)
 ![Sigma v2.1](https://img.shields.io/badge/Sigma-v2.1-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Everything runs against Docker labs bound to `127.0.0.1` on isolated per-lab Docker
-networks. PoCs are fixed payloads that refuse to touch anything Custos Vulnerum did not
+networks. PoCs are fixed payloads that refuse to touch anything Vulnerum did not
 launch — no scanning, no arbitrary targets. Read [SECURITY.md](SECURITY.md) first.
 
 ## Quickstart
@@ -16,7 +16,7 @@ launch — no scanning, no arbitrary targets. Read [SECURITY.md](SECURITY.md) fi
 Prerequisites: Docker (with Compose v2) and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/alexiss31/custos-vulnerum && cd custos-vulnerum
+git clone https://github.com/alexiss31/vulnerum && cd vulnerum
 uv sync --extra dev
 
 uv run custos lab up cve-2021-41773        # launch the vulnerable lab (loopback only)

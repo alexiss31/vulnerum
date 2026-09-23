@@ -2,7 +2,7 @@
 
 ## Safety model
 
-Custos Vulnerum is a **local lab tool**. It runs deliberately vulnerable software to
+Vulnerum is a **local lab tool**. It runs deliberately vulnerable software to
 demonstrate the vulnerability lifecycle, with safety enforced architecturally:
 
 - Vulnerable services publish ports on `127.0.0.1` only and run on isolated per-lab
@@ -30,10 +30,10 @@ demonstrate the vulnerability lifecycle, with safety enforced architecturally:
   local labs. The vulnerable images are real and dangerous — do not expose the ports
   beyond loopback (the compose files make that hard on purpose).
 
-## Reporting vulnerabilities in Custos Vulnerum
+## Reporting vulnerabilities in Vulnerum
 
 Report suspected vulnerabilities in this codebase via
-[GitHub private reporting](https://github.com/alexiss31/custos-vulnerum/security/advisories/new)
+[GitHub private reporting](https://github.com/alexiss31/vulnerum/security/advisories/new)
 (or open a public issue if the finding is low risk and has no exploit value).
 
 Include: affected version/commit, reproduction steps, impact, and any proof-of-concept

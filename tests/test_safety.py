@@ -65,7 +65,7 @@ def test_managed_gate_rejects_unlabelled_containers(apache_lab: Any, monkeypatch
         "containers",
         lambda self: [_container(bindings=(PortBinding("80/tcp", "127.0.0.1", "8917"),))],
     )
-    with pytest.raises(SafetyError, match="not a Custos Vulnerum container"):
+    with pytest.raises(SafetyError, match="not a Vulnerum container"):
         safety.assert_managed(env)
 
 
